@@ -8,7 +8,8 @@ from LinkedQFile import *
 from string import ascii_lowercase
 from pythonds.graphs import Graph
 import queue
-
+from pythonds.basic import Queue
+import time
 class Nod(object):        
     def __init__(self,value = None):
         # breddenförst-trädsobjekt
@@ -68,7 +69,23 @@ def result_list(li,word):
 			return(li, word.value)
 		finally:
 			pass
-
+def result_listA(li,word):
+	#Prints order of the words and returns a list with the words aswell
+	if word != None:
+		try:
+			iterword = result_listA(li, word.parent.value)
+			#li.append(word.value)
+			li.append(word.value)
+			#print(word.value, end = " ")
+			return (li, word.value)
+			
+		except AttributeError:
+			#print(word.value, end = " ")
+			li.append(word.value)
+			#return(li, word.value)
+		finally:
+			#li.append(word.value)
+			pass
 
 def buildGraph(wordFile):
     d = {}
@@ -104,39 +121,42 @@ def traverse(y):
 def bfs(g,start):
   start.setDistance(0)
   start.setPred(None)
-  vertQueue = LinkedQ()
-  vertQueue.put(start)
-  while (vertQueue.length > 0):
-    currentVert = vertQueue.get()
+  vertQueue = Queue()
+  vertQueue.enqueue(start)
+  while (vertQueue.size() > 0):
+    currentVert = vertQueue.dequeue()
     for nbr in currentVert.getConnections():
       if (nbr.getColor() == 'white'):
         nbr.setColor('gray')
         nbr.setDistance(currentVert.getDistance() + 1)
         nbr.setPred(currentVert)
-        vertQueue.put(nbr)
+        vertQueue.enqueue(nbr)
     currentVert.setColor('black')
 
 
 def makechildren(start, slut, parentqueue, alphabet, bad_tree,words):
 	#for x in range(parentqueue.length):
+	current = None
 	while not parentqueue.isEmpty():
 	
 		parentwordNode = parentqueue.get()
-		#print(parentwordNode.value.value)
 		parentword = list(parentwordNode.value.value) # Läser in ett ord från kön
 		testword = list(parentwordNode.value.value)
 		
 		
 		for i in range(len(parentword)):
+			
 			for k in range(len(alphabet)):
 				testword = list(testword)
-				#print (testword)
+				
+
 				testword[i] = alphabet[k]			## Byter ut en bokstav i ordet från kö 
 				
 
 				
 				testword = "".join(testword)
 				testword = str(testword)			## Gör om det till en string efter att ha varit en lista
+				
 				
 				if words.exists(testword) and not bad_tree.exists(testword): #Om det nya ordet finns skapas en nod med det ordet tillsammans med pekare till förälder
 					
@@ -151,9 +171,66 @@ def makechildren(start, slut, parentqueue, alphabet, bad_tree,words):
 			testword = list(testword)
 			testword[i] = parentword[i]
 			longest = current
+			# if current != None:
+			# 	longest = current
+			# else:
+			# 	longest = None
 	
 	print("Hittade INGEN väg från", start, "till", slut)
-	print("Men, den längsta vägen till", start, " är: ")
+	
+	return longest
+
+	
+	# Kan även göras rekursivt genom att byta ut while not till for x in range(parentqueue.length) och ta bort kommentaren nedan
+	#recursive = makechildren(start, slut, parentqueue, alphabet, bad_tree,words)
+	#return recursive
+
+def makechildren2(start, slut, parentqueue, alphabet, bad_tree,words):
+	#for x in range(parentqueue.length):
+	current = None
+	longest = None
+	while not parentqueue.isEmpty():
+	
+		parentwordNode = parentqueue.get()
+		parentword = list(parentwordNode.value.value) # Läser in ett ord från kön
+		testword = list(parentwordNode.value.value)
+		
+		
+		for i in range(len(parentword)):
+			
+			for k in range(len(alphabet)):
+				testword = list(testword)
+				
+
+				testword[i] = alphabet[k]			## Byter ut en bokstav i ordet från kö 
+				
+
+				
+				testword = "".join(testword)
+				testword = str(testword)			## Gör om det till en string efter att ha varit en lista
+				
+				
+				if words.exists(testword) and not bad_tree.exists(testword): #Om det nya ordet finns skapas en nod med det ordet tillsammans med pekare till förälder
+					
+					bad_tree.put(testword)
+					current = Nod(testword)
+					current.parent = parentwordNode
+					parentqueue.put(current)
+					if testword == slut:
+						#print ("Det finns en väg till", slut)
+						return current
+
+			testword = list(testword)
+			testword[i] = parentword[i]
+			longest = current
+			# if current != None:
+			# 	longest = current
+			# else:
+			# 	longest = None
+	
+	#print("Hittade INGEN väg från", start, "till", slut)
+	#print("Men, den längsta vägen till", start, " är: ")
+	
 	return longest
 
 	
@@ -204,6 +281,7 @@ def uppgift1(words, prog):
 	print ("Du letar nu efter vägar i ",prog)
 	start = input("Vilket ord vill du starta på? ")
 	slut =  input("Vilket ord vill du sluta på? ")
+	tic = time.time()
 	start = start.lower()
 	slut = slut.lower()
 	print("\n")
@@ -215,38 +293,81 @@ def uppgift1(words, prog):
 	
 	foo = makechildren(start, slut, queue, L, bad_tree, words)
 	li = []
-	result = result_list(li, foo)
-	print ("\n")
-	#print (result[0])
+	if foo != None:
+		print ("Men den längsta vägen till", start, "är: ")
+		result = result_list(li, foo)
+		print ("\n")
+	toc = time.time()
+	tidtagning = toc-tic
+	print ("Tiden det tar för vår BFS", tidtagning)	
+	
 
 def uppgiftC():
-	# g = buildGraph("word5.txt")
-	# #print(type(g))
-
-	# for v in g:
-	# 	for w in v.getConnections():
-	# 		print("(%s , %s )" % (v.getId() , w.getId()))
-	
-	#bfs(g, g.getVertex("söt"))
-	####
-	##Printgrej
-	#traverse(g.getVertex('sur'))
+	tic = time.time()
 	g = buildGraph('word3.txt')
 	g_bfs = bfs(g, g.getVertex('söt'))
 	v = g.getVertex('sur')
 	while v != None:
 		print(v.id)
-	v = v.getPredicate()
+		v = v.getPred()
+	toc = time.time()
+	tidtagning = toc-tic
+	print ("Tiden det tar för pythons BFS ", tidtagning)
 
+def uppgiftA():
+	tree = createtree("word3.txt")
 	
+	temp = None
+	queue = LinkedQ()
+	words = []
+	#Lista med alfabetet
+	L = list(ascii_lowercase)
+	L= L + ["å", "ä", "ö"] # Lägger till non ascii
+	longestlist = []
+	longest = []
+	with open("word3.txt", "r", encoding = "utf-8") as fil:
+	    for rad in fil:
+	        ordet = rad.strip()                # Ett trebokstavsord per rad
+	        words.append(ordet)            # in i sökträdet
+	
+	for p in range(len(words)):
+		bad_tree = Bintree()
+		start = words[p]
+		slut = 0
 
+		
+		temp = Nod(start)
+		queue.put(temp)
+		
+		foo = makechildren2(start, slut, queue, L, bad_tree, tree)
+		li = []
+		result = result_listA(li, foo)
+		if foo != None:
+			#print ( result[0])
+			if longestlist == []:
+				longestlist.append(result[0])
+			elif len(result[0])>len(longestlist[0]):
+			 	longestlist = []
+			 	longest = result[0]
+			 	longestlist.append(longest)
+			 	#print (result[0])
+			elif len(result[0])>=len(longest):
+				longest = result[0]
+				longestlist.append(longest)
+		
+	for x in range(len(longestlist)):
+		print (longestlist[x])
+		print ("\n")
+	#print (longestlist)	
 def main():
 
+	
+	
 	#uppgift123()
-	uppgiftC()
-
+	#uppgiftC()
+	uppgiftA()
  
-
+#jod
 
 
 if __name__ == "__main__":
