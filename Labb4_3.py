@@ -61,12 +61,12 @@ def result_list(li,word):
 			li.append(word.value)
 			
 			print(word.value, end = " ")
-			return (li, word.value)
+			return #(li, word.value)
 			
 		except AttributeError:
 			print(word.value, end = " ")
 			li.append(word.value)
-			return(li, word.value)
+			return#(li, word.value)
 		finally:
 			pass
 def result_listA(li,word):
@@ -135,6 +135,9 @@ def bfs(g,start):
 
 
 def makechildren(start, slut, parentqueue, alphabet, bad_tree,words):
+	# Returnar först Noden till det ordet som söks/ordet som ligger längst bort från det som vi startar på om vi inte hittar något
+	# element 2 i return är boolean för om vi har hittat en väg eller inte
+	#for x in range(parentqueue.length):
 	#for x in range(parentqueue.length):
 	current = None
 	while not parentqueue.isEmpty():
@@ -166,7 +169,7 @@ def makechildren(start, slut, parentqueue, alphabet, bad_tree,words):
 					parentqueue.put(current)
 					if testword == slut:
 						print ("Det finns en väg till", slut)
-						return current
+						return (current, True)
 
 			testword = list(testword)
 			testword[i] = parentword[i]
@@ -178,7 +181,7 @@ def makechildren(start, slut, parentqueue, alphabet, bad_tree,words):
 	
 	print("Hittade INGEN väg från", start, "till", slut)
 	
-	return longest
+	return (longest, False)
 
 	
 	# Kan även göras rekursivt genom att byta ut while not till for x in range(parentqueue.length) och ta bort kommentaren nedan
@@ -186,7 +189,8 @@ def makechildren(start, slut, parentqueue, alphabet, bad_tree,words):
 	#return recursive
 
 def makechildren2(start, slut, parentqueue, alphabet, bad_tree,words):
-	#for x in range(parentqueue.length):
+	# Funktion för uppgift A, för att gå igenom alla ord i listan och ta reda på vilka som ligger längst ifrån varandra.
+
 	current = None
 	longest = None
 	while not parentqueue.isEmpty():
@@ -293,10 +297,13 @@ def uppgift1(words, prog):
 	
 	foo = makechildren(start, slut, queue, L, bad_tree, words)
 	li = []
-	if foo != None:
+	# Printfunktion för att printa antingen den längsta vägen till ordet eller vägen för start till slut
+	if foo[1] == False:
 		print ("Men den längsta vägen till", start, "är: ")
-		result = result_list(li, foo)
-		print ("\n")
+		result = result_list(li, foo[0])
+	else:
+		result = result_list(li, foo[0])
+	print ("\n")		
 	toc = time.time()
 	tidtagning = toc-tic
 	print ("Tiden det tar för vår BFS", tidtagning)	
@@ -314,8 +321,10 @@ def uppgiftC():
 	tidtagning = toc-tic
 	print ("Tiden det tar för pythons BFS ", tidtagning)
 
-def uppgiftA():
-	tree = createtree("word3.txt")
+def uppgiftA(wordfile):
+	# Uppgift för att ta reda på vilka ord som ligger längst ifrån varandra. 
+	# Går igenom alla ord i textfilen och skriver listor med de som ligger längst ifrån varandra
+	tree = createtree(wordfile)
 	
 	temp = None
 	queue = LinkedQ()
@@ -325,7 +334,7 @@ def uppgiftA():
 	L= L + ["å", "ä", "ö"] # Lägger till non ascii
 	longestlist = []
 	longest = []
-	with open("word3.txt", "r", encoding = "utf-8") as fil:
+	with open(wordfile, "r", encoding = "utf-8") as fil:
 	    for rad in fil:
 	        ordet = rad.strip()                # Ett trebokstavsord per rad
 	        words.append(ordet)            # in i sökträdet
@@ -363,12 +372,14 @@ def main():
 
 	
 	
-	#uppgift123()
+	uppgift123()
 	#uppgiftC()
-	uppgiftA()
+	#uppgiftA("word5.txt")
  
 #jod
 
+# Flöts -> stump
+#pjunk -> Flöts
 
 if __name__ == "__main__":
 	main()
